@@ -2,8 +2,9 @@ FROM ruby:3.0.2-alpine
 
 ENV BUNDLE_WITHOUT development:test
 
-WORKDIR /myapp
-COPY Gemfile Gemfile.lock /myapp/
+WORKDIR /app
+ENV RAILS_ENV production
+COPY Gemfile Gemfile.lock .
 COPY package.json yarn.lock .
 
 RUN apk add --no-cache -t .build-dependencies \
@@ -16,19 +17,21 @@ RUN apk add --no-cache -t .build-dependencies \
     tzdata \
     yarn \
     nginx \
-    sudo \
+    openrc \
  && gem install bundler:2.0.2 \
  && bundle install \
  && yarn install --production --frozen-lockfile && yarn cache clean \
  && apk del --purge .build-dependencies
 
-COPY . /myapp
+COPY . /app
 
 # nginx
-RUN groupadd nginx
-RUN useradd -g nginx nginx
 ADD docker/production/nginx.conf /etc/nginx/nginx.conf
 ADD docker/production/entrypoint.sh /app/entrypoint.sh
+
+# openrc preparation 
+# ref: https://stackoverflow.com/questions/65627946
+RUN openrc && touch /run/openrc/softlevel 
 
 EXPOSE 80
 
