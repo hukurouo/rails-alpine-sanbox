@@ -10,7 +10,7 @@ import "channels"
 import ('jquery')
 
 import 'bootstrap'
-import 'admin-lte'
+//import 'admin-lte'
 
 Rails.start()
 Turbolinks.start()
